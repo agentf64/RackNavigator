@@ -1,0 +1,18 @@
+{
+  "slug": "FightingPint",
+  "name": "Fighting Pint",
+  "brand": "Fighting Pint",
+  "version": "2.0.0",
+  "license": "CC0-1.0",
+  "author": "Seth Moore",
+  "authorEmail": "",
+  "authorUrl": "",
+  "modules": [
+    {
+      "slug": "Navigator",
+      "name": "Navigator",
+      "description": "Pop-out minimap for navigating large racks",
+      "tags": ["Utility"]
+    }
+  ]
+}
