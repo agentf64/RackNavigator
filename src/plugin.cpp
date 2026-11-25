@@ -443,11 +443,40 @@ struct NavigatorModule : Module {
 };
 
 struct NavigatorWidget : ModuleWidget {
+	// Panel images (15.24 x 15.24 mm, i.e. the full width of the 3HP panel)
+	widget::SvgWidget* logoDark = nullptr;   // white artwork, shown on the dark panel
+	widget::SvgWidget* logoLight = nullptr;  // black artwork, shown on the light panel
+
+	// Gap between the bottom edge of the panel and the image, in pixels.
+	// 0 = image sits flush against the bottom. Increase to lift it up.
+	static constexpr float logoBottomMargin = 0.f;
+
 	NavigatorWidget(NavigatorModule* module) {
 		setModule(module);
 		// Standard 3HP width (15px * 3 = 45px) x 380px height
 		box.size = math::Vec(RACK_GRID_WIDTH * 3, RACK_GRID_HEIGHT);
 		ensureListenerInstalled();
+
+		logoDark = new widget::SvgWidget;
+		logoDark->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/logo-dark.svg")));
+		logoDark->box.pos = math::Vec(
+			(box.size.x - logoDark->box.size.x) / 2.f,
+			box.size.y - logoDark->box.size.y - logoBottomMargin);
+		addChild(logoDark);
+
+		logoLight = new widget::SvgWidget;
+		logoLight->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/logo-light.svg")));
+		logoLight->box.pos = math::Vec(
+			(box.size.x - logoLight->box.size.x) / 2.f,
+			box.size.y - logoLight->box.size.y - logoBottomMargin);
+		addChild(logoLight);
+	}
+
+	void step() override {
+		// Show only the image that matches the current theme
+		if (logoDark) logoDark->visible = darkPanel;
+		if (logoLight) logoLight->visible = !darkPanel;
+		ModuleWidget::step();
 	}
 
 	void draw(const DrawArgs& args) override {
@@ -484,6 +513,7 @@ struct NavigatorWidget : ModuleWidget {
 			nvgRestore(args.vg);
 		}
 
+		// Draws the child widgets, including the panel image
 		ModuleWidget::draw(args);
 	}
 
