@@ -176,6 +176,9 @@ struct NavigatorOverlay : widget::OpaqueWidget {
 
 	NavigatorOverlay() {
 		box.size = math::Vec(320.f, 200.f);
+		// Start hidden. New widgets are visible by default, which made the
+		// first hotkey press "toggle" the map closed instead of open.
+		visible = false;
 	}
 
 	void updateBounds() {
@@ -311,7 +314,7 @@ struct GlobalHotkeyListener : widget::Widget {
 		if (overlay && overlay->isVisible() && !closeWithHotkey) return;
 
 		if (!overlay) {
-			overlay = new NavigatorOverlay();
+			overlay = new NavigatorOverlay();   // created hidden
 			APP->scene->addChild(overlay);
 		}
 
@@ -403,6 +406,18 @@ struct GlobalHotkeyListener : widget::Widget {
 				return;
 			}
 			Widget::onButton(e);
+			return;
+		}
+
+		// --- Click outside the open map closes it ---
+		// Clicks inside the map are handled (and consumed) by the map itself,
+		// so only clicks outside it reach this point.
+		if (overlay && overlay->isVisible()
+			&& e.action == GLFW_PRESS
+			&& !overlay->box.contains(e.pos)) {
+			overlay->hide();
+			mousePending = false;   // don't let a mouse hotkey reopen it on release
+			e.consume(this);
 			return;
 		}
 
